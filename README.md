@@ -41,6 +41,34 @@ Sistema completo para gerenciamento de campanhas NPS (Net Promoter Score) com in
 - **Docker Compose** >= 2.0
 - **Git**
 
+## 🔐 Segurança
+
+**⚠️ IMPORTANTE:** Este projeto possui controles de segurança rigorosos para proteger suas credenciais.
+
+### Geração de Credenciais Seguras
+
+**Nunca use as credenciais de exemplo em produção!** Use o script automatizado:
+
+```bash
+./generate-env.sh
+```
+
+Este script gera automaticamente:
+- Senha do PostgreSQL (32 caracteres aleatórios)
+- JWT Secret (64 bytes em base64)
+- Configuração completa do ambiente
+
+### Documentação de Segurança
+
+Para informações completas sobre:
+- ✅ Geração de credenciais seguras
+- ✅ Checklist de deployment em produção
+- ✅ Rotação de credenciais
+- ✅ Auditoria de segurança
+- ✅ Resposta a incidentes
+
+**Consulte o arquivo [SECURITY.md](SECURITY.md)**
+
 ## ⚙️ Instalação
 
 ### 1. Clone o repositório
@@ -52,12 +80,32 @@ cd NPS-IPB
 
 ### 2. Configure as variáveis de ambiente
 
+**🔐 Use o script automatizado para gerar credenciais seguras:**
+
+```bash
+# Gera credenciais criptograficamente seguras
+./generate-env.sh
+```
+
+**Ou manualmente:**
+
 ```bash
 # Copie o arquivo de exemplo
 cp .env.example .env
 
-# Edite o arquivo .env e configure suas variáveis
+# Edite o arquivo .env com suas credenciais
 nano .env
+```
+
+**⚠️ NUNCA use as senhas de exemplo em produção!**
+
+Gere credenciais fortes:
+```bash
+# Senha do PostgreSQL (32 caracteres)
+openssl rand -base64 32 | tr -d "=+/" | cut -c1-32
+
+# JWT Secret (64 bytes)
+openssl rand -base64 64 | tr -d "\n"
 ```
 
 **Variáveis importantes para produção:**
