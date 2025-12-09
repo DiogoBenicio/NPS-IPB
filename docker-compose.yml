@@ -6,9 +6,9 @@ services:
     build: ./database
     container_name: NPS-IPB-database
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-nps_db}
-      POSTGRES_USER: ${POSTGRES_USER:-user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -19,8 +19,8 @@ services:
     build: ./backend
     container_name: NPS-IPB-backend
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://user:password@database:5432/nps_db?schema=public}
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key-here}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
       PORT: ${PORT:-5000}
       NODE_ENV: ${NODE_ENV:-development}
     ports:
