@@ -1,0 +1,74 @@
+# Compose file format v2+ no longer uses explicit version field
+# Removed to avoid warnings in Docker Compose v2+
+
+services:
+  database:
+    build: ./database
+    container_name: NPS-IPB-database
+    environment:
+      POSTGRES_DB: nps_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: NPS-IPB-backend
+    environment:
+      DATABASE_URL: postgresql://user:password@database:5432/nps_db?schema=public
+      JWT_SECRET: your-secret-key-here
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    container_name: NPS-IPB-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=/api
+      - VITE_API_PROXY_TARGET=http://backend:5000
+
+  nginx-dev:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    container_name: NPS-IPB-nginx-dev
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+    profiles:
+      - dev
+
+  nginx-prod:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.prod
+    container_name: NPS-IPB-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+    profiles:
+      - prod
+
+volumes:
+  postgres_data:
