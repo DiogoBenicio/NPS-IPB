@@ -6,21 +6,23 @@ services:
     build: ./database
     container_name: NPS-IPB-database
     environment:
-      POSTGRES_DB: nps_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${POSTGRES_DB:-nps_db}
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   backend:
     build: ./backend
     container_name: NPS-IPB-backend
     environment:
-      DATABASE_URL: postgresql://user:password@database:5432/nps_db?schema=public
-      JWT_SECRET: your-secret-key-here
-      PORT: 5000
+      DATABASE_URL: ${DATABASE_URL:-postgresql://user:password@database:5432/nps_db?schema=public}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-here}
+      PORT: ${PORT:-5000}
+      NODE_ENV: ${NODE_ENV:-development}
     ports:
       - "5000:5000"
     depends_on:
@@ -28,9 +30,13 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+    restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        - NODE_ENV=${NODE_ENV:-development}
     container_name: NPS-IPB-frontend
     ports:
       - "3000:3000"
@@ -40,8 +46,9 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=/api
-      - VITE_API_PROXY_TARGET=http://backend:5000
+      - VITE_API_URL=${VITE_API_URL:-/api}
+      - VITE_API_PROXY_TARGET=${VITE_API_PROXY_TARGET:-http://backend:5000}
+    restart: unless-stopped
 
   nginx-dev:
     build:
@@ -55,6 +62,7 @@ services:
       - backend
     profiles:
       - dev
+    restart: unless-stopped
 
   nginx-prod:
     build:
@@ -67,8 +75,13 @@ services:
     depends_on:
       - frontend
       - backend
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
     profiles:
       - prod
+    restart: unless-stopped
 
 volumes:
   postgres_data:
